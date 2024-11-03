@@ -48,14 +48,23 @@ function handleInput(wordleCell) {
     animateInput(wordleCell); //FROM JS-STYLING.JS
 }
 
+function disableCurrentRow() {
+    let rowCells = wordleBoard.children[currentRow].querySelectorAll(".wordle-cell");
+    rowCells.forEach(cell => {
+        cell.disabled = true;
+    })
+}
+
 function moveToNextRow(currentCell) {
     flipCells(currentCell); //FLIP CELLS ANIMATION FROM JS-STYLING.JS & STYLE.CSS
     
     setTimeout(() => { //WAIT FOR FLIP CELLS TO FINISH, THEN EXECUTE
+        disableCurrentRow();
+
         currentRow++;
 
         if (currentRow < ROWS_AMOUNT) {
-            const nextCellIndex = currentRow * rowLength; //ROWLENGTH IS DEFINED IN VISUAL KEYBOARD AS CELLS_AMOUNT
+            const nextCellIndex = currentRow * CELLS_AMOUNT; 
             const nextCell = cells[nextCellIndex];
             if (nextCell) {
                 nextCell.focus(); 
