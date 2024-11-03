@@ -1,0 +1,217 @@
+:root {
+    --text-color: black;
+    --background-color: white;
+    --base-variant: lightgray;
+    --darker-base-variant: rgb(160, 160, 160);
+    --wrong-char: gray;
+    --exist-char: orange;
+    --correct-char: green;
+}
+.darkmode {
+    --text-color: #e0e0e0; 
+    --background-color: #1e1e1e; 
+    --base-variant: #333333; 
+    --darker-base-variant: #555555; 
+    --wrong-char: #3a3a3a; 
+    --exist-char: #ffa500; 
+    --correct-char: #4caf50;
+}
+.colorblind {
+    --text-color: #000000; 
+    --background-color: #f8f9fa; 
+    --base-variant: #dedede; 
+    --darker-base-variant: #b0b0b0; 
+    --wrong-char: #888888; 
+    --exist-char: #ffdd33; 
+    --correct-char: #2d89ef;
+}
+
+
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+main {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.display-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-align: center;
+}
+.display-row h1 {
+    margin: 0;
+}
+#mode-btns {
+    position: absolute;
+    right: 20%;
+    margin: 5px;
+    padding: 5px;
+}
+
+#wordle-board {
+    height: auto;
+    width: auto;
+}
+
+.wordle-row {
+    margin: 5px;
+}
+.wordle-cell {
+    background-color: var(--base-variant);
+    color: var(--text-color);
+    margin: 4px;
+    height: 50px; 
+    width: 50px;
+    font-size: 3rem;
+    text-align: center;
+    box-sizing: border-box;
+    line-height: 50px;
+    padding: 0;
+}
+
+input[type="text"] {
+    border: none;
+    outline: none;
+    /* caret-color: transparent; */
+}
+/* input[type="text"]:focus {
+    border: rgb(63, 63, 63);
+} */
+.typing {
+    animation-name: inputPop;
+    animation-duration: 0.2s;
+}
+
+@keyframes inputPop {
+    0% {transform: scale(1);}
+    50% {transform: scale(1.09);}
+    100% {transform: scale(1);}
+}
+
+.flip-animation {
+    animation: quick-flip 1s ease forwards;
+}
+
+@keyframes quick-flip {
+    0% {
+        transform: rotateX(0);
+    }
+    100% {
+        transform: rotateX(180deg); 
+    }
+}
+
+
+#visual-keyboard {
+    display: flex;
+    flex-direction: column; 
+    align-items: center; 
+    margin: 20px; 
+    border-radius: 10px;
+}
+
+.keyboard-row {
+    display: flex;
+    justify-content: center; 
+    margin-bottom: 8px; 
+}
+
+.vs-keyboard-button {
+    cursor: pointer;
+    background-color: var(--base-variant);
+    height: 80px;
+    width: 55px;
+    margin: 0 5px;
+    border: none; 
+    border-radius: 8px; 
+    font-size: 24px; 
+    transition: transform 0.1s ease;
+    color: var(--text-color); 
+    transition: background-color 0.3s, transform 0.2s; 
+}
+
+.vs-keyboard-button:hover {
+    background-color: var(--darker-base-variant); 
+    transform: scale(1.09);
+}
+
+.vs-keyboard-button.special {
+    background-color: var(--exist-char); 
+    color: var(--text-color);
+}
+
+.vs-keyboard-button:focus {
+    outline: 2px solid var(--darker-base-variant); 
+}
+.vs-keyboard-button.pressed {
+    background-color: var(--darker-base-variant);
+    transform: scale(1);
+}
+
+.correct, .vs-keyboard-button.correct {
+    background-color: var(--correct-char); 
+}
+
+.exist, .vs-keyboard-button.wrong-position {
+    background-color: var(--exist-char); 
+}
+
+.wrong {
+    background-color: var(--wrong-char); 
+}
+.vs-keyboard-button.incorrect {
+    background-color: var(--darker-base-variant)
+}
+
+
+/* === HIDDEN POPUP THAT DISPLAYS ONCE U WIN === */
+#play-again-popup {
+    z-index: 1000;
+    position: fixed;
+    left: 50%;
+    top: 30%;
+    transform: translate(-50%, -50%);
+    background-color: var(--background-color);
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    display: none;
+}
+#play-again-paragraph {
+    color: var(--text-color)
+}
+
+
+/*THESE 3 ARE FOR THE FLIP ANIMATION ONLY*/
+.wordle-cell {
+    backface-visibility: hidden;
+    transition: transform 0.6s ease; /* Smooth rotation */
+}
+
+.flip-animation {
+    animation: smoothFlip 0.6s ease forwards;
+}
+
+/* Define the smooth flip effect */
+@keyframes smoothFlip {
+    0% {
+        transform: rotateX(0deg);
+    }
+    50% {
+        transform: rotateX(90deg);
+    }
+    100% {
+        transform: rotateX(0deg); /* End in original position */
+    }
+}
