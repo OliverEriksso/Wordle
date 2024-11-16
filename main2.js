@@ -6,9 +6,11 @@ const allWords = "wordle.json"
 let targetWord = "";
 
 let gameWon = false;
+let gameLost = false; //LEGIT ONLY HERE SO YOU CAN'T TYPE AFTER U LOST
 
 let currentRow = 0;
 let cells;
+let activeCell = null;
 
 const ROWS_AMOUNT = 6;
 const CELLS_AMOUNT = 5;
@@ -43,6 +45,7 @@ function handleInput(wordleCell) {
     wordleCell.value = wordleCell.value.toUpperCase();
     const nextCell = wordleCell.nextElementSibling;
     if (nextCell) {
+        activeCell = nextCell;
         nextCell.focus(); 
     }
     animateInput(wordleCell); //FROM JS-STYLING.JS
@@ -54,11 +57,18 @@ function disableCurrentRow() {
         cell.disabled = true;
     })
 }
+function enableCurrentRow() {
+    let rowCells = wordleBoard.children[currentRow].querySelectorAll(".wordle-cell");
+    rowCells.forEach(cell => {
+        cell.disabled = false;
+    })
+}
 
 function moveToNextRow(currentCell) {
     flipCells(currentCell); //FLIP CELLS ANIMATION FROM JS-STYLING.JS & STYLE.CSS
     
     setTimeout(() => { //WAIT FOR FLIP CELLS TO FINISH, THEN EXECUTE
+        if (gameWon) return; //NEED THIS ELSE YOU'LL BE ABLE TO CONTINUE WRITING AFTER WINNING
         disableCurrentRow();
 
         currentRow++;
@@ -67,12 +77,14 @@ function moveToNextRow(currentCell) {
             const nextCellIndex = currentRow * CELLS_AMOUNT; 
             const nextCell = cells[nextCellIndex];
             if (nextCell) {
+                enableCurrentRow();
                 nextCell.focus(); 
             }
         }
         
         if (currentRow === ROWS_AMOUNT) {
             if (!gameWon) {
+                gameLost = true;
                 hasLost();
             }
         }
@@ -87,6 +99,9 @@ function addCellEventListeners(wordleCell, wordleRow) {
         return userInput;
     }
 
+    wordleCell.addEventListener("focus", () => { //KEEP TRACK OF WHAT CELL IS ACTIVE
+        activeCell = wordleCell;
+    })
     wordleCell.addEventListener("input", (event) => {
         if (event.inputType !== "deleteContentBackward") {
             handleInput(wordleCell);
@@ -94,6 +109,11 @@ function addCellEventListeners(wordleCell, wordleRow) {
         updateUserInput();
     });
     
+    document.addEventListener("click", () => { //NOW WHEN YOU PRESS ANYWHERE FOCUS IS KEPT ON THE ACTIVE CELL
+        this.blur();
+        activeCell.focus();
+    })
+
     wordleCell.addEventListener("keydown", (event) => {
         if (event.key === "Backspace") {
             const pastCell = wordleCell.previousElementSibling;
@@ -106,10 +126,10 @@ function addCellEventListeners(wordleCell, wordleRow) {
             const userInput = updateUserInput();
             if (userInput.length === CELLS_AMOUNT) {
 
-                // if (!words.includes(userInput.toLowerCase())) {
-                //     alert("Word not found in the list!");
-                //     return;
-                // }
+                if (!words.includes(userInput.toLowerCase())) {
+                    alert("Word not found in the list!");
+                    return;
+                }
 
                 let currentCell = wordleBoard.children[currentRow].querySelectorAll(".wordle-cell");
                 let scoreArray = checkUserInput(userInput);
@@ -148,9 +168,11 @@ function createBoard() {
 async function initializeGame() {
     targetWord = await getNewWord();
     createBoard();
+    disableBoard();
 
     cells = Array.from(document.querySelectorAll(".wordle-cell"));
 
+    enableCurrentRow();
     const firstCell = wordleBoard.querySelector(".wordle-row input");
     firstCell.focus();
 }
@@ -203,13 +225,13 @@ function showPopup(message) {
 }
 
 function hasWon() {
-    showPopup("Congratulations, you WIN!");
     disableBoard();
+    showPopup("Congratulations, you WIN!");
 }
 
 function hasLost() {
-    showPopup(`Congratulations, for a LOSER! Word: ${targetWord} `);
     disableBoard();
+    showPopup(`Congratulations, for a LOSER! Word: ${targetWord} `);
 }
 
 
@@ -217,6 +239,7 @@ function disableBoard() {
     const cells = document.querySelectorAll(".wordle-cell");
     cells.forEach(cell => {
         cell.disabled = true;
+        cell.blur();
     });
 }
 

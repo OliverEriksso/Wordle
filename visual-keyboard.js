@@ -21,42 +21,36 @@ let currentCellIndex = 0;
 
 function keyboardEventListener(newButton) {
     newButton.addEventListener('click', () => {
+        if (gameWon) return;
+        if (gameLost) return; 
+
         const buttonContent = newButton.textContent; 
 
-        const x = currentCellIndex; 
-        const y = currentRow; 
-        const oneDimensionalIndex = y * rowLength + x; //MAKE THE CURRENT ROW AND CURRENT CELL INTO A 1D ARRAY TO EASILY SWAP TO NEXT ROW
-
         if (buttonContent === "BACK") {
-            if (currentCellIndex > 0 || cells[oneDimensionalIndex].value) {
-                if (cells[oneDimensionalIndex].value === "") {
-                    currentCellIndex--; 
-                }
-                cells[currentRow * CELLS_AMOUNT + currentCellIndex].value = ""; 
-                cells[currentRow * CELLS_AMOUNT + currentCellIndex].focus(); 
+            const pastCell = activeCell.previousElementSibling;
+            if (activeCell.value === "" && pastCell) {
+                activeCell = pastCell;
+                activeCell.value = "";
+                activeCell.focus();
+            } else { 
+                activeCell.value = ""; //NECCESARY OR SOMETIMES IT BUGS OUT
             }
         } else if (buttonContent === "ENTER") {
-            if (currentCellIndex === CELLS_AMOUNT) {
-                let currentCell = wordleBoard.children[currentRow].querySelectorAll(".wordle-cell");
+            const currentRowCells = Array.from(wordleBoard.children[currentRow].querySelectorAll(".wordle-cell"));
+            const userInput = currentRowCells.map(cell => cell.value).join("");
+            if (userInput.length === CELLS_AMOUNT) {
+                const scoreArray = checkUserInput(userInput);
 
-                const userInput = Array.from(currentCell)
-                    .map(cell => cell.value)
-                    .join("");
+                updateCellStyles(scoreArray, currentRowCells);
+                updateKeyboardColors(userInput, scoreArray);
 
-                const scoreArray = checkUserInput(userInput); //MAIN.JS
-                updateCellStyles(scoreArray, currentCell); //JS-STYLING.JS
-                updateKeyboardColors(userInput, scoreArray);  //JS-STYLING.JS
-
-                checkForWin(scoreArray); //MAIN2.JS
-
-                moveToNextRow(currentCell); //MAIN2.JS
-                currentCellIndex = 0; 
+                checkForWin(scoreArray);
+                moveToNextRow(currentRowCells);
             }
         } else {
             if (currentCellIndex < CELLS_AMOUNT) {
-                cells[oneDimensionalIndex].value = buttonContent; 
-                handleInput(cells[oneDimensionalIndex]); //MAIN2.JS
-                currentCellIndex++;
+                activeCell.value = buttonContent; 
+                handleInput(activeCell); //MAIN2.JS
             }
         }
     });
